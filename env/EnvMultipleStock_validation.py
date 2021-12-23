@@ -35,9 +35,9 @@ class StockEnvValidation(gym.Env):
         self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,)) 
         # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30] 
         # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (6 * STOCK_DIM + 1,))
         # load data from a pandas dataframe
-        self.data = self.df.loc[self.day,:]
+        self.data = self.df.loc[self.day:self.day,:]
         self.terminal = False     
         self.turbulence_threshold = turbulence_threshold
         # initalize state
@@ -169,7 +169,7 @@ class StockEnvValidation(gym.Env):
                 self._buy_stock(index, actions[index])
 
             self.day += 1
-            self.data = self.df.loc[self.day,:]         
+            self.data = self.df.loc[self.day:self.day,:]         
             self.turbulence = self.data['turbulence'].values[0]
             #print(self.turbulence)
             #load next state
@@ -181,7 +181,6 @@ class StockEnvValidation(gym.Env):
                     self.data.rsi.values.tolist() + \
                     self.data.cci.values.tolist() + \
                     self.data.adx.values.tolist()
-            
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
             self.asset_memory.append(end_total_asset)
@@ -198,7 +197,7 @@ class StockEnvValidation(gym.Env):
     def reset(self):  
         self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
         self.day = 0
-        self.data = self.df.loc[self.day,:]
+        self.data = self.df.loc[self.day:self.day,:]
         self.turbulence = 0
         self.cost = 0
         self.trades = 0
@@ -213,7 +212,6 @@ class StockEnvValidation(gym.Env):
                       self.data.rsi.values.tolist()  + \
                       self.data.cci.values.tolist()  + \
                       self.data.adx.values.tolist() 
-            
         return self.state
     
     def render(self, mode='human',close=False):

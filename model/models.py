@@ -34,7 +34,7 @@ def train_A2C(env_train, model_name, timesteps=25000):
     end = time.time()
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (A2C): ', (end - start) / 60, ' minutes')
+    print('Training time (A2C): ', round((end - start) / 60, 2), ' minutes')
     return model
 
 def train_ACER(env_train, model_name, timesteps=25000):
@@ -44,7 +44,7 @@ def train_ACER(env_train, model_name, timesteps=25000):
     end = time.time()
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (A2C): ', (end - start) / 60, ' minutes')
+    print('Training time (A2C): ', round((end - start) / 60, 2), ' minutes')
     return model
 
 
@@ -62,7 +62,7 @@ def train_DDPG(env_train, model_name, timesteps=10000):
     end = time.time()
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (DDPG): ', (end-start)/60,' minutes')
+    print('Training time (DDPG): ', round((end-start)/60, 2),' minutes')
     return model
 
 def train_PPO(env_train, model_name, timesteps=50000):
@@ -76,7 +76,7 @@ def train_PPO(env_train, model_name, timesteps=50000):
     end = time.time()
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (PPO): ', (end - start) / 60, ' minutes')
+    print('Training time (PPO): ', round((end - start) / 60, 2), ' minutes')
     return model
 
 def train_GAIL(env_train, model_name, timesteps=1000):
@@ -95,7 +95,7 @@ def train_GAIL(env_train, model_name, timesteps=1000):
     end = time.time()
 
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
-    print('Training time (PPO): ', (end - start) / 60, ' minutes')
+    print('Training time (PPO): ', round((end - start) / 60, 2), ' minutes')
     return model
 
 
@@ -202,7 +202,7 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
             # if the mean of the historical data is less than the 90% quantile of insample turbulence data
             # then we tune up the turbulence_threshold, meaning we lower the risk
             turbulence_threshold = np.quantile(insample_turbulence.turbulence.values, 1)
-        print("turbulence_threshold: ", turbulence_threshold)
+        print("turbulence_threshold: ", np.round(turbulence_threshold, 2))
 
         ############## Environment Setup starts ##############
         ## training env
@@ -212,6 +212,7 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
         ## validation env
         validation = data_split(df, start=unique_trade_date[i - rebalance_window - validation_window],
                                 end=unique_trade_date[i - rebalance_window])
+
         env_val = DummyVecEnv([lambda: StockEnvValidation(validation,
                                                           turbulence_threshold=turbulence_threshold,
                                                           iteration=i)])
@@ -229,7 +230,7 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
               unique_trade_date[i - rebalance_window])
         DRL_validation(model=model_a2c, test_data=validation, test_env=env_val, test_obs=obs_val)
         sharpe_a2c = get_validation_sharpe(i)
-        print("A2C Sharpe Ratio: ", sharpe_a2c)
+        print("A2C Sharpe Ratio: ", round(sharpe_a2c, 2))
 
         print("======PPO Training========")
         model_ppo = train_PPO(env_train, model_name="PPO_100k_dow_{}".format(i), timesteps=100000)
@@ -237,7 +238,7 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
               unique_trade_date[i - rebalance_window])
         DRL_validation(model=model_ppo, test_data=validation, test_env=env_val, test_obs=obs_val)
         sharpe_ppo = get_validation_sharpe(i)
-        print("PPO Sharpe Ratio: ", sharpe_ppo)
+        print("PPO Sharpe Ratio: ", round(sharpe_ppo, 2))
 
         print("======DDPG Training========")
         model_ddpg = train_DDPG(env_train, model_name="DDPG_10k_dow_{}".format(i), timesteps=10000)
@@ -276,4 +277,4 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
         ############## Trading ends ##############
 
     end = time.time()
-    print("Ensemble Strategy took: ", (end - start) / 60, " minutes")
+    print("Ensemble Strategy took: ", round((end - start) / 60, 2), " minutes")

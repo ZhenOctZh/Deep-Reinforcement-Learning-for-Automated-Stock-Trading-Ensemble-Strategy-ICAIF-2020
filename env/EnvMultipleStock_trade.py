@@ -38,9 +38,9 @@ class StockEnvTrade(gym.Env):
         self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,)) 
         # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30] 
         # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (6 * STOCK_DIM + 1,))
         # load data from a pandas dataframe
-        self.data = self.df.loc[self.day,:]
+        self.data = self.df.loc[self.day:self.day,:]
         self.terminal = False     
         self.turbulence_threshold = turbulence_threshold
         # initalize state
@@ -125,18 +125,19 @@ class StockEnvTrade(gym.Env):
             df_total_value.to_csv('results/account_value_trade_{}_{}.csv'.format(self.model_name, self.iteration))
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
-            print("previous_total_asset:{}".format(self.asset_memory[0]))           
-
-            print("end_total_asset:{}".format(end_total_asset))
-            print("total_reward:{}".format(self.state[0]+sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))- self.asset_memory[0] ))
-            print("total_cost: ", self.cost)
-            print("total trades: ", self.trades)
+            print("previous_total_asset:{}".format(round(self.asset_memory[0], 2)))           
+            print("end_total_asset:{}".format(round(end_total_asset, 2)))
+            print("asset_change_percent:{}".format(round(self.asset_memory[0]/end_total_asset, 2)))
+            print("total_reward:{}".format(round(
+                self.state[0]+sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))- self.asset_memory[0], 2) ))
+            print("total_cost: ", round(self.cost, 2))
+            print("total trades: ", round(self.trades, 2))
 
             df_total_value.columns = ['account_value']
             df_total_value['daily_return']=df_total_value.pct_change(1)
             sharpe = (4**0.5)*df_total_value['daily_return'].mean()/ \
                   df_total_value['daily_return'].std()
-            print("Sharpe: ",sharpe)
+            print("Sharpe: ", round(sharpe, 2))
             
             df_rewards = pd.DataFrame(self.rewards_memory)
             df_rewards.to_csv('results/account_rewards_trade_{}_{}.csv'.format(self.model_name, self.iteration))
@@ -173,7 +174,7 @@ class StockEnvTrade(gym.Env):
                 self._buy_stock(index, actions[index])
 
             self.day += 1
-            self.data = self.df.loc[self.day,:]         
+            self.data = self.df.loc[self.day:self.day,:]         
             self.turbulence = self.data['turbulence'].values[0]
             #print(self.turbulence)
             #load next state
@@ -204,7 +205,7 @@ class StockEnvTrade(gym.Env):
         if self.initial:
             self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
             self.day = 0
-            self.data = self.df.loc[self.day,:]
+            self.data = self.df.loc[self.day:self.day,:]
             self.turbulence = 0
             self.cost = 0
             self.trades = 0
@@ -225,7 +226,7 @@ class StockEnvTrade(gym.Env):
             self.asset_memory = [previous_total_asset]
             #self.asset_memory = [self.previous_state[0]]
             self.day = 0
-            self.data = self.df.loc[self.day,:]
+            self.data = self.df.loc[self.day:self.day,:]
             self.turbulence = 0
             self.cost = 0
             self.trades = 0

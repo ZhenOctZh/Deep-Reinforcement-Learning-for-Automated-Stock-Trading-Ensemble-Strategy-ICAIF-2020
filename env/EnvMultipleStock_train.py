@@ -33,9 +33,9 @@ class StockEnvTrain(gym.Env):
         self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,)) 
         # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30] 
         # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape = (6 * STOCK_DIM + 1,))
         # load data from a pandas dataframe
-        self.data = self.df.loc[self.day,:]
+        self.data = self.df.loc[self.day:self.day,:]
         self.terminal = False             
         # initalize state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
@@ -144,7 +144,7 @@ class StockEnvTrain(gym.Env):
                 self._buy_stock(index, actions[index])
 
             self.day += 1
-            self.data = self.df.loc[self.day,:]         
+            self.data = self.df.loc[self.day:self.day,:]         
             #load next state
             # print("stock_shares:{}".format(self.state[29:]))
             self.state =  [self.state[0]] + \
@@ -173,7 +173,7 @@ class StockEnvTrain(gym.Env):
     def reset(self):
         self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
         self.day = 0
-        self.data = self.df.loc[self.day,:]
+        self.data = self.df.loc[self.day:self.day,:]
         self.cost = 0
         self.trades = 0
         self.terminal = False 
