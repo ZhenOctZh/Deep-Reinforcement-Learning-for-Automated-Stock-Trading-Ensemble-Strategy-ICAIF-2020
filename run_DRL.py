@@ -24,6 +24,7 @@ def run_model() -> None:
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)
 
+    data = data[data.tic == 'AAPL']
     print(data.head())
     print(data.size)
 
