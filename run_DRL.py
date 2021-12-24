@@ -16,7 +16,7 @@ def run_model() -> None:
     """Train the model."""
 
     # read and preprocess data
-    preprocessed_path = "done_data.csv"
+    preprocessed_path = "done_data_rolling_window.csv"
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
@@ -26,7 +26,7 @@ def run_model() -> None:
 
     print(data.head())
     print(data.size)
-
+    data = data[data.tic == 'DJI']
     # 2015/10/01 is the date that validation starts
     # 2016/01/01 is the date that real trading starts
     # unique_trade_date needs to start from 2015/10/01 for validation purpose

@@ -144,8 +144,11 @@ def get_validation_sharpe(iteration):
     df_total_value = pd.read_csv('results/account_value_validation_{}.csv'.format(iteration), index_col=0)
     df_total_value.columns = ['account_value_train']
     df_total_value['daily_return'] = df_total_value.pct_change(1)
-    sharpe = (4 ** 0.5) * df_total_value['daily_return'].mean() / \
-             df_total_value['daily_return'].std()
+    try:
+        sharpe = (4 ** 0.5) * df_total_value['daily_return'].mean() / \
+                 df_total_value['daily_return'].std()
+    except:
+        sharpe = 99999999
     return sharpe
 
 
@@ -247,6 +250,7 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
               unique_trade_date[i - rebalance_window])
         DRL_validation(model=model_ddpg, test_data=validation, test_env=env_val, test_obs=obs_val)
         sharpe_ddpg = get_validation_sharpe(i)
+        print("DDPG Sharpe Ratio: ", round(sharpe_ddpg, 2))
 
         ppo_sharpe_list.append(sharpe_ppo)
         a2c_sharpe_list.append(sharpe_a2c)
