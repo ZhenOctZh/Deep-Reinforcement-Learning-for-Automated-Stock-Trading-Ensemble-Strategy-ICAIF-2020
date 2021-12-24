@@ -33,7 +33,7 @@ class StockEnvTrain(gym.Env):
         self.action_space = spaces.Box(low = -1, high = 1,shape = (STOCK_DIM,)) 
         # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30] 
         # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape = ((6 + 1 + 6*20) * STOCK_DIM + 1,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape = ((6 + 1 ) * STOCK_DIM + 1,))
         # load data from a pandas dataframe
         self.data = self.df.loc[self.day:self.day,:]
         self.terminal = False             
@@ -46,9 +46,7 @@ class StockEnvTrain(gym.Env):
                       self.data.cci.values.tolist() + \
                       self.data.adx.values.tolist() + \
                       self.data.volume.values.tolist() 
-        for i in range(1, 21):
-            for col in ['adjcp', 'macd', 'rsi', 'cci', 'adx', 'volume']:
-                self.state += self.data[col+str(i)].values.tolist() 
+
 
         # initialize reward
         self.reward = 0
@@ -163,9 +161,7 @@ class StockEnvTrain(gym.Env):
                     self.data.cci.values.tolist() + \
                     self.data.adx.values.tolist() + \
                     self.data.volume.values.tolist() 
-            for i in range(1, 21):
-                for col in ['adjcp', 'macd', 'rsi', 'cci', 'adx', 'volume']:
-                    self.state += self.data[col+str(i)].values.tolist() 
+
 
             end_total_asset = self.state[0]+ \
               sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
@@ -199,9 +195,7 @@ class StockEnvTrain(gym.Env):
                       self.data.cci.values.tolist() + \
                       self.data.adx.values.tolist()  + \
                       self.data.volume.values.tolist()
-        for i in range(1, 21):
-            for col in ['adjcp', 'macd', 'rsi', 'cci', 'adx', 'volume']:
-                self.state += self.data[col+str(i)].values.tolist() 
+
 
 
         # iteration += 1 

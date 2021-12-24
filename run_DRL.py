@@ -23,10 +23,10 @@ def run_model() -> None:
         data = preprocess_data()
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)
+    data = data[data.tic == 'DJI']
 
     print(data.head())
     print(data.size)
-    data = data[data.tic == 'DJI']
     # 2015/10/01 is the date that validation starts
     # 2016/01/01 is the date that real trading starts
     # unique_trade_date needs to start from 2015/10/01 for validation purpose
